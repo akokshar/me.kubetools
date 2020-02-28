@@ -72,7 +72,7 @@ func (gc *kubeGC) Clean(dryRun bool) error {
 		return err
 	}
 
-	var orphans = []orphanResource{}
+	var orphans = []*orphanResource{}
 
 	for _, group := range serverGroups.Groups {
 		srs, err := discoveryClient.ServerResourcesForGroupVersion(group.PreferredVersion.GroupVersion)
@@ -105,7 +105,7 @@ func (gc *kubeGC) Clean(dryRun bool) error {
 				}
 				annotations := labels.Set(r.GetAnnotations())
 				if gc.matchFilter.Matches(annotations) {
-					orphans = append(orphans, orphanResource{
+					orphans = append(orphans, &orphanResource{
 						gv:        gv,
 						resource:  apiResource.Name,
 						kind:      apiResource.Kind,
@@ -117,18 +117,22 @@ func (gc *kubeGC) Clean(dryRun bool) error {
 		}
 	}
 
-	// Sort resources list: non-namespaced, namespaced, namespaces
+	// Sort resources list: non-namespaced, namespaced, namespaces, CRDs
+	weight := func(o *orphanResource) int {
+		if o.kind == "CustomResourceDefinition" {
+			return 4
+		}
+		if o.kind == "Namespace" {
+			return 3
+		}
+		if o.namespace != "" {
+			return 2
+		}
+		return 1
+	}
+
 	sort.Slice(orphans, func(i, j int) bool {
-		if orphans[i].kind == orphans[j].kind {
-			return false
-		}
-		if orphans[j].kind == "Namespace" {
-			return true
-		}
-		if orphans[i].namespace == "" && orphans[j].namespace != "" {
-			return true
-		}
-		return false
+		return weight(orphans[i]) < weight(orphans[j])
 	})
 
 	// Do cleanup
