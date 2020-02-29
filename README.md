@@ -2,7 +2,8 @@
 
 ## kubegc
 
-find and delete orphaned resources:
-- selects resurces to check with labelSelector
-- filter selected resources by checking annotations
-- delete found resources
+find and delete orphaned resources:  
+- select resurces to with labelSelector  
+- filter selected resources by checking whether certain annotations are set  
+- delete filtered resources  
+

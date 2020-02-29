@@ -34,7 +34,6 @@ type orphanResource struct {
 
 // NewKubeGC creates new kubeGC instance
 func NewKubeGC(config *rest.Config, labelSelector string, annotationFilter string) (KubeGC, error) {
-
 	matchFilter, err := labels.Parse(annotationFilter)
 	if err != nil {
 		return nil, err
@@ -130,7 +129,6 @@ func (gc *kubeGC) Clean(dryRun bool) error {
 		}
 		return 1
 	}
-
 	sort.Slice(orphans, func(i, j int) bool {
 		return weight(orphans[i]) < weight(orphans[j])
 	})
@@ -148,7 +146,6 @@ func (gc *kubeGC) Clean(dryRun bool) error {
 
 	for _, o := range orphans {
 		result := "OK"
-
 		err = dynamicClient.
 			Resource(o.gv.WithResource(o.resource)).
 			Namespace(o.namespace).
