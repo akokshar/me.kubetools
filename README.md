@@ -1,5 +1,7 @@
 # me.kubetools
 
+Moved to https://github.com/akokshar/k8s-utils
+
 ## kubegc
 
 find and delete orphaned resources:  
